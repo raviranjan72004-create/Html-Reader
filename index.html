@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Study Reader" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="/Html-Reader/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/Html-Reader/icons/icon-192.png" />
+  <title>Study Reader</title>
+  <script type="module" crossorigin src="/Html-Reader/assets/index-B9uul2tI.js"></script>
+  <link rel="stylesheet" crossorigin href="/Html-Reader/assets/index-BlwHn6BK.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ===================== LIBRARY SCREEN ===================== -->
+    <section id="library" class="screen">
+      <header class="library-header">
+        <h1>Study Reader</h1>
+        <p class="tagline">Your HTML notes, annotated like paper — nothing in the source file ever changes.</p>
+      </header>
+
+      <div class="library-actions">
+        <label class="btn btn-primary" for="file-input">
+          <span>Open HTML Note</span>
+          <input id="file-input" type="file" accept=".html,.htm,text/html" hidden />
+        </label>
+        <label class="btn" for="import-input">
+          <span>Import Annotations (.json)</span>
+          <input id="import-input" type="file" accept="application/json" hidden />
+        </label>
+      </div>
+
+      <h2 class="library-subhead">Recent</h2>
+      <ul id="recent-docs" class="recent-list"></ul>
+    </section>
+
+    <!-- ===================== READER SCREEN ===================== -->
+    <section id="reader" class="screen hidden">
+
+      <!-- ---------- Top toolbar ---------- -->
+      <header id="toolbar">
+        <div class="toolbar-group">
+          <button id="btn-back" class="icon-btn" title="Back to Library" aria-label="Back">←</button>
+          <button id="btn-sidebar" class="icon-btn" title="Toggle sidebar" aria-label="Toggle sidebar">☰</button>
+        </div>
+
+        <div class="toolbar-group toolbar-tools">
+          <button data-tool="pen" class="tool-btn" title="Pen">✏️</button>
+          <button data-tool="highlighter" class="tool-btn" title="Highlighter">🖊️</button>
+          <button data-tool="eraser" class="tool-btn" title="Eraser">🧽</button>
+          <button data-tool="lasso" class="tool-btn" title="Lasso select">⬚</button>
+          <button data-tool="shape" class="tool-btn" title="Shapes">▱</button>
+          <button data-tool="sticky" class="tool-btn" title="Sticky note">🗒️</button>
+          <button data-tool="none" class="tool-btn" title="Read / scroll (no drawing)">👆</button>
+
+          <span class="toolbar-divider"></span>
+
+          <div class="color-swatches" id="color-swatches"></div>
+          <input id="width-slider" type="range" min="1" max="24" step="0.5" value="2.5" title="Stroke width" />
+
+          <span class="toolbar-divider"></span>
+
+          <button id="btn-undo" class="icon-btn" title="Undo">↶</button>
+          <button id="btn-redo" class="icon-btn" title="Redo">↷</button>
+        </div>
+
+        <div class="toolbar-group">
+          <button id="btn-search" class="icon-btn" title="Search">🔍</button>
+          <button id="btn-bookmark" class="icon-btn" title="Bookmark this section">🔖</button>
+          <button id="btn-focus" class="icon-btn" title="Focus mode">◎</button>
+          <button id="btn-dark" class="icon-btn" title="Dark mode">🌓</button>
+          <button id="btn-export" class="icon-btn" title="Export annotations">⭳</button>
+          <button id="btn-more" class="icon-btn" title="More">⋯</button>
+        </div>
+      </header>
+
+      <!-- shape-tool sub-picker, shown only while shape tool active -->
+      <div id="shape-picker" class="floating-picker hidden">
+        <button data-shape="line">╱</button>
+        <button data-shape="arrow">↗</button>
+        <button data-shape="rectangle">▭</button>
+        <button data-shape="circle">◯</button>
+      </div>
+
+      <!-- text-selection popover: highlight / underline / strike / copy -->
+      <div id="text-popover" class="floating-picker hidden">
+        <button data-action="highlight" title="Highlight">🖍️</button>
+        <button data-action="underline" title="Underline"><u>U</u></button>
+        <button data-action="strike" title="Strikethrough"><s>S</s></button>
+        <button data-action="copy" title="Copy">⧉</button>
+      </div>
+
+      <!-- lasso selection mini-toolbar -->
+      <div id="lasso-toolbar" class="floating-picker hidden">
+        <span id="lasso-count"></span>
+        <button id="lasso-delete">Delete</button>
+        <button id="lasso-dismiss">Done</button>
+      </div>
+
+      <div id="reader-progress"><div id="reader-progress-bar"></div></div>
+
+      <div class="reader-body">
+
+        <!-- ---------- Sidebar ---------- -->
+        <aside id="sidebar">
+          <nav class="sidebar-tabs">
+            <button data-panel="toc" class="sidebar-tab active">Contents</button>
+            <button data-panel="search" class="sidebar-tab">Search</button>
+            <button data-panel="bookmarks" class="sidebar-tab">Bookmarks</button>
+            <button data-panel="annotations" class="sidebar-tab">Annotations</button>
+            <button data-panel="tags" class="sidebar-tab">Tags</button>
+            <button data-panel="recent" class="sidebar-tab">Recent</button>
+          </nav>
+
+          <div class="sidebar-panels">
+            <div id="panel-toc" class="sidebar-panel active">
+              <ul id="toc-list" class="toc-list"></ul>
+            </div>
+
+            <div id="panel-search" class="sidebar-panel">
+              <input id="search-input" type="search" placeholder="Search this note…" />
+              <div id="search-nav" class="search-nav hidden">
+                <button id="search-prev">▲</button>
+                <span id="search-count">0 / 0</span>
+                <button id="search-next">▼</button>
+              </div>
+              <ul id="search-results" class="result-list"></ul>
+            </div>
+
+            <div id="panel-bookmarks" class="sidebar-panel">
+              <ul id="bookmarks-list" class="result-list"></ul>
+            </div>
+
+            <div id="panel-annotations" class="sidebar-panel">
+              <div class="panel-section-label">Sticky notes &amp; strokes</div>
+              <ul id="annotations-list" class="result-list"></ul>
+              <div id="orphans-section" class="hidden">
+                <div class="panel-section-label warn">Needs review — anchor not found after edit</div>
+                <ul id="orphans-list" class="result-list"></ul>
+              </div>
+            </div>
+
+            <div id="panel-tags" class="sidebar-panel">
+              <div class="tag-quick-add">
+                <select id="tag-level">
+                  <option value="high">🔴 High yield</option>
+                  <option value="medium">🟡 Medium</option>
+                  <option value="low">🟢 Low</option>
+                  <option value="custom">🏷️ Custom</option>
+                </select>
+                <button id="tag-add-here">Tag current section</button>
+              </div>
+              <ul id="tags-list" class="result-list"></ul>
+            </div>
+
+            <div id="panel-recent" class="sidebar-panel">
+              <ul id="recent-locations-list" class="result-list"></ul>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ---------- Reading viewport ---------- -->
+        <main id="viewport">
+          <div id="content" tabindex="-1"></div>
+        </main>
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>
