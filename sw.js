@@ -4,7 +4,14 @@
 // nothing to precache for them.
 
 const CACHE_NAME = 'study-reader-shell-v1';
-const PRECACHE = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
+
+// The service worker's own URL tells us what subpath it's deployed under
+// — e.g. https://user.github.io/Html-Reader/sw.js → base
+// "/Html-Reader/". Deriving this at runtime (rather than hardcoding "/")
+// is what makes the same sw.js work whether the app is served from a
+// domain root, a GitHub Pages project subpath, or anywhere else.
+const BASE = new URL('.', self.location.href).pathname;
+const PRECACHE = [BASE, `${BASE}manifest.webmanifest`, `${BASE}icons/icon-192.png`, `${BASE}icons/icon-512.png`];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
